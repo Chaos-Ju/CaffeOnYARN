@@ -43,8 +43,6 @@ public class LaunchContainerThread implements Runnable {
     private String output;
     private int connection;
 
-    private String[] addresses;
-
     // Container retry options
     private ContainerRetryPolicy containerRetryPolicy =
             ContainerRetryPolicy.NEVER_RETRY;
@@ -86,7 +84,7 @@ public class LaunchContainerThread implements Runnable {
     }
 
     public LaunchContainerThread(Container container, boolean train, String solver, boolean feature,
-                                 String label, String model, String output, int connection, String[] addresses,
+                                 String label, String model, String output, int connection,
                                  ApplicationMaster appMaster, CaffeServerAddress serverAddress) {
         this(container, appMaster);
         this.serverAddress = serverAddress;
@@ -97,7 +95,6 @@ public class LaunchContainerThread implements Runnable {
         this.model = model;
         this.output = output;
         this.connection = connection;
-        this.addresses = addresses;
         if (this.serverAddress == null) {
             LOG.info("server address is null");
         }
@@ -147,8 +144,7 @@ public class LaunchContainerThread implements Runnable {
                     this.label,
                     this.model,
                     this.output,
-                    this.connection,
-                    this.addresses);
+                    this.connection);
         } catch (JsonProcessingException e) {
             LOG.info("cluster spec cannot convert into base64 json string!");
             e.printStackTrace();
@@ -167,7 +163,7 @@ public class LaunchContainerThread implements Runnable {
                         containerRetryPolicy, containerRetryErrorCodes,
                         containerMaxRetries, containrRetryInterval);
         for (String cmd : commands) {
-            LOG.info("Container " + container.getId() + " command: " + cmd.toString());
+            LOG.info("Container " + container.getId() + " command: " + cmd);
         }
         ContainerLaunchContext ctx = ContainerLaunchContext.newInstance(
                 localResources, env, commands, null, appMaster.getAllTokens().duplicate(),

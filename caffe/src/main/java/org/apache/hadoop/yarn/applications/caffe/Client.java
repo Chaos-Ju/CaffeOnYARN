@@ -495,12 +495,10 @@ public class Client {
                 if (appRpc == null) {
                     String hostname = report.getHost();
                     int port = report.getRpcPort();
-                    LOG.info("application master rpc host: " + hostname + "; port: " + port);
+                    LOG.info("Application master rpc host: " + hostname + "; port: " + port);
                     appRpc = new CaffeApplicationRpcClient(hostname, port).getRpc();
                 }
-
             }
-
 
             if (YarnApplicationState.FINISHED == state) {
                 if (FinalApplicationStatus.SUCCEEDED == caffeStatus) {
@@ -508,18 +506,17 @@ public class Client {
                     return true;
                 } else {
                     LOG.info("Application did finished unsuccessfully."
-                            + " YarnState=" + state.toString() + ", tfAppFinalState=" + caffeStatus.toString()
+                            + " YarnState=" + state.toString() + ", appFinalState=" + caffeStatus.toString()
                             + ". Breaking monitoring loop");
                     return false;
                 }
             } else if (YarnApplicationState.KILLED == state
                     || YarnApplicationState.FAILED == state) {
                 LOG.info("Application did not finish."
-                        + " YarnState=" + state.toString() + ", tfAppFinalState=" + caffeStatus.toString()
+                        + " YarnState=" + state.toString() + ", appFinalState=" + caffeStatus.toString()
                         + ". Breaking monitoring loop");
                 return false;
             }
-
         }
 
     }

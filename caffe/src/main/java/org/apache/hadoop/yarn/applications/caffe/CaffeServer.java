@@ -44,7 +44,6 @@ public class CaffeServer {
     public static final String OPT_MODEL = "model";
     public static final String OPT_OUTPUT = "output";
     public static final String OPT_CONNECTION = "connection";
-    public static final String OPT_ADDRESSES = "addresses";
 
     public String clusterSpecString = null;
     public Map<String, List<String>> cluster = null;
@@ -57,7 +56,6 @@ public class CaffeServer {
     public String model;
     public String output;
     public int connection;
-    public String[] addresses;
 
     com.yahoo.ml.caffe.Config config;
     com.yahoo.ml.caffe.DataSource<scala.Tuple7, scala.Tuple2> sourceTrain;
@@ -102,8 +100,6 @@ public class CaffeServer {
                 "output path");
         opts.addOption(OPT_CONNECTION, true,
                 "connect mode");
-        opts.addOption(OPT_ADDRESSES, true,
-                "addresses");
     }
 
     public boolean init(String[] args) throws ParseException, IOException {
@@ -128,9 +124,7 @@ public class CaffeServer {
         model = cliParser.getOptionValue(OPT_MODEL, "");
         output = cliParser.getOptionValue(OPT_OUTPUT, "");
         connection = Integer.parseInt(cliParser.getOptionValue(OPT_CONNECTION, "2"));
-        addresses = cliParser.getOptionValues(OPT_ADDRESSES);
         cluster = ClusterSpec.toClusterMapFromJsonString(clusterSpecString);
-        LOG.info("solver: " + solver);
 
         config = new Config(args);
         sourceTrain = DataSource.getSource(config, true);
@@ -140,32 +134,36 @@ public class CaffeServer {
 
     public void train() {
 
-        DataSource<scala.Tuple7, scala.Tuple2> test[]=new DataSource[1];
-        test[0] = sourceTrain;
+       String[] addresses = new String[cluster.get("processor").size()];
+       cluster.get("processor").toArray(addresses);
 
-        com.yahoo.ml.caffe.CaffeProcessor caffeProcessor = com.yahoo.ml.caffe.CaffeProcessor.instance(test, taskIndex);
-        caffeProcessor.start(addresses);
-        caffeProcessor.sync();
+       DataSource<scala.Tuple7, scala.Tuple2> source[]=new DataSource[1];
+       source[0] = sourceTrain;
 
-        scala.collection.Iterator<Tuple7<String, String, Object, Object, Object, Object, byte[]>> data[];
-        data = sourceTrain.read();
+       com.yahoo.ml.caffe.CaffeProcessor caffeProcessor = com.yahoo.ml.caffe.CaffeProcessor.instance(source, taskIndex);
+       caffeProcessor.start(addresses);
 
-        for(int i = 0; i < data.length; i++){
-            scala.collection.Iterator<Tuple7<String, String, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, byte[]>> iter = data[i];
-            while (iter.hasNext()) {
-                caffeProcessor.feedQueue(0, iter.next());
-            }
-        }
+       caffeProcessor.sync();
 
-        caffeProcessor.stop();
+       scala.collection.Iterator<Tuple7<String, String, Object, Object, Object, Object, byte[]>> data[];
+       data = sourceTrain.read();
 
-        LOG.info("train success");
+       for(int i = 0; i < data.length; i++){
+           scala.collection.Iterator<Tuple7<String, String, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, byte[]>> iter = data[i];
+           while (iter.hasNext()) {
+               caffeProcessor.feedQueue(0, iter.next());
+           }
+       }
+
+       caffeProcessor.stop();
+
+       LOG.info("train success");
 
     }
 
     public void startCaffeServer() {
-        LOG.info("Launch a new caffeProcessor " + taskIndex);
+        LOG.info("Launch a new caffeProcessor: " + taskIndex);
         train();
-        LOG.info("caffeProcessor " + taskIndex + " stopped!");
+        LOG.info("caffeProcessor: " + taskIndex + " stopped!");
     }
 }
