@@ -63,5 +63,5 @@ yarn jar $jar $CLIENT_MAIN_CLASS \
          --model $model \
          --output $output \
          --num $num \
-         --container_memory 4096
+         --container_memory 2048
 

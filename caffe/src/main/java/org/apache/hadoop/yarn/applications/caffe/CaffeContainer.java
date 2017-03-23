@@ -102,9 +102,9 @@ public class CaffeContainer {
     }
 
     public String makeCommands(long containerMemory, String clusterSpec, int taskIndex, boolean train, String solver, boolean feature,
-                                      String label, String model, String output, int connection, String[] addresses) {
+                                      String label, String model, String output, int connection) {
         // Set the necessary command to execute on the allocated container
-        Vector<CharSequence> vargs = new Vector<CharSequence>(5);
+        Vector<CharSequence> vargs = new Vector<CharSequence>(30);
         vargs.add(ApplicationConstants.Environment.JAVA_HOME.$$() + "/bin/java");
         vargs.add("-Xmx" + containerMemory + "m");
         String containerClassName = CaffeServer.class.getName();
@@ -118,9 +118,9 @@ public class CaffeContainer {
         vargs.add("--" + CaffeServer.OPT_MODEL + " " + model);
         vargs.add("--" + CaffeServer.OPT_OUTPUT + " " + output);
         vargs.add("--" + CaffeServer.OPT_CONNECTION + " " + connection);
-        vargs.add("--" + CaffeServer.OPT_ADDRESSES + " " + addresses);
-        vargs.add("1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/CaffeServer." + ApplicationConstants.STDOUT);
-        vargs.add("2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/CaffeServer." + ApplicationConstants.STDERR);
+
+        vargs.add("1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/Caffe.stdout");
+        vargs.add("2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/Caffe.stderr");
 
         // Get final commmand
         StringBuilder commands = new StringBuilder();

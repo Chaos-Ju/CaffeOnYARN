@@ -102,7 +102,7 @@ private[caffe] class CaffeProcessor[T1, T2](val sources: Array[DataSource[T1, T2
   //start the processor
   def start(rank2addresses: Array[String]) : Unit = {
     if (sources(0).isTrain) {
-      val peer_addr = new Array[java.lang.String](rank2addresses.length)
+      //val peer_addr = new Array[java.lang.String](rank2addresses.length)
       caffeNetList(0).connect(rank2addresses)
     }
 

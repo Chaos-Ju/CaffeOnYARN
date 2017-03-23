@@ -18,9 +18,7 @@
 
 package org.apache.hadoop.yarn.applications.caffe;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -121,8 +119,6 @@ ApplicationMaster {
     private String model;
     private String output;
     private int connection;
-    com.yahoo.ml.caffe.Config config;
-    com.yahoo.ml.caffe.DataSource<scala.Tuple7, scala.Tuple2> sourceTrain;
 
     // Counter for completed containers ( complete denotes successful or failed )
     private AtomicInteger numCompletedContainers = new AtomicInteger();
@@ -361,7 +357,6 @@ ApplicationMaster {
         new HelpFormatter().printHelp("ApplicationMaster", opts);
     }
 
-
     private final class RpcForClient implements CaffeApplicationRpc {
 
         @Override
@@ -432,10 +427,10 @@ ApplicationMaster {
 
         // Register self with ResourceManager
         // This will start heartbeating to the RM
-
         RegisterApplicationMasterResponse response = amRMClient
                 .registerApplicationMaster(appMasterHostname, appMasterRpcPort,
                         appMasterTrackingUrl);
+
         // Dump out information about cluster capability as seen by the
         // resource manager
         long maxMem = response.getMaximumResourceCapability().getMemorySize();
@@ -471,6 +466,7 @@ ApplicationMaster {
 
         int numTotalContainersToRequest =
                 numTotalContainers - previousAMRunningContainers.size();
+
         // Setup ask for containers from RM
         // Send request for containers to RM
         // Until we get our fully allocated quota, we keep on polling RM for
@@ -498,6 +494,7 @@ ApplicationMaster {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException ex) {
+
             }
         }
 
@@ -527,13 +524,13 @@ ApplicationMaster {
         if (numFailedContainers.get() == 0) {
             appStatus = FinalApplicationStatus.SUCCEEDED;
         } else {
-            appStatus = FinalApplicationStatus.SUCCEEDED;
+            appStatus = FinalApplicationStatus.FAILED;
             appMessage = "Diagnostics." + ", total=" + numTotalContainers
                     + ", completed=" + numCompletedContainers.get() + ", allocated="
                     + numAllocatedContainers.get() + ", failed="
                     + numFailedContainers.get();
             LOG.info(appMessage);
-            success = true;
+            success = false;
         }
         try {
             amRMClient.unregisterApplicationMaster(appStatus, appMessage, null);
@@ -558,14 +555,10 @@ ApplicationMaster {
                 return false;
             }
 
-            String[] addresses = new String[numTotalProcessorContainers];
-
             for (Container allocatedContainer : this.allocatedContainers) {
                 if (numCaffeContainers < numTotalProcessorContainers) {
                     LOG.info("work cid: " + allocatedContainer.getId().toString());
                     clusterSpec.addServerSpec(allocatedContainer.getId().toString(), allocatedContainer.getNodeId().getHost());
-                    CaffeServerAddress address = clusterSpec.getServerAddress(allocatedContainer.getId().toString());
-                    addresses[numCaffeContainers] = address.getAddress();
                     numCaffeContainers++;
                 } else {
                     break;
@@ -583,12 +576,11 @@ ApplicationMaster {
                         + allocatedContainer.getResource().getMemorySize()
                         + ", containerResourceVirtualCores"
                         + allocatedContainer.getResource().getVirtualCores());
-                // + ", containerToken"
-                // +allocatedContainer.getContainerToken().getIdentifier().toString());
 
                 LOG.info("server cid: " + allocatedContainer.getId().toString());
-                LaunchContainerThread launchDelegator = new LaunchContainerThread(allocatedContainer, train, solver, feature,
-                        label, model, output, connection, addresses, this, clusterSpec.getServerAddress(allocatedContainer.getId().toString()));
+                LaunchContainerThread launchDelegator = new LaunchContainerThread(allocatedContainer,
+                        train, solver, feature, label, model, output, connection, this,
+                        clusterSpec.getServerAddress(allocatedContainer.getId().toString()));
                 LOG.info("ServerAdress: " + clusterSpec.getServerAddress(allocatedContainer.getId().toString()));
                 launchDelegator.setCaffeProcessorJar(caffeProcessorJar);
                 launchDelegator.setContainerMemory(containerMemory);
