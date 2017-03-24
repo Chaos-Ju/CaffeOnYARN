@@ -1,5 +1,14 @@
 #!/bin/bash
 
+usage()
+{
+  echo 'Usage: ydl-cf -jar <path_to_caffe-with-dependency_jar>'
+  echo '               -conf <your_solver_protoxt>'
+  echo '               -model <model_output_hdfs_path>'
+  echo '               -num <container_num>'
+  exit
+}
+
 conf=""
 feature=""
 label=""
@@ -7,47 +16,36 @@ model=""
 output=""
 num=0
 jar=""
-while true  
+
+while true
 do
+    echo "$1"
     case "$1" in
          -conf)
             conf="$2"
             echo "conf: $conf"
             shift
-            ;;  
-         -feature)
-            feature="$2"
-            echo "feature: $feature"
-            shift  
-            ;;
-         -label)
-            label="$2"
-            echo "label: $label"
-            shift
-            ;;
+         ;;
          -model)
             model="$2"
             echo "model: $model"
             shift
-            ;;
-         -output)
-            output="$2"
-            echo "output: $output"
-            shift  
-            ;;
+         ;;
          -num)
             num="$2"
             echo "num: $num"
             shift
-            ;;
+         ;;
          -jar)
             jar="$2"
             echo "jar path: $jar"
-            shift  
-            ;;  
-         *)  
-            shift  
-         break 
+            shift
+         ;;
+         "")
+            break
+         ;;
+         *)
+            usage
          ;;
     esac
 shift
@@ -58,10 +56,9 @@ CLIENT_MAIN_CLASS="org.apache.hadoop.yarn.applications.caffe.Client"
 yarn jar $jar $CLIENT_MAIN_CLASS \
          --jar $jar \
          --conf $conf \
-         --feature $feature \
-         --label $label \
          --model $model \
-         --output $output \
          --num $num \
-         --container_memory 2048
-
+         --label label \
+         --container_memory 2048 \
+         --feature accuracy,loss \
+         --output hdfs:///mnist_features_result
