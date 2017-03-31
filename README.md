@@ -10,6 +10,9 @@ Caffe on YARN is a project to support running Caffe on YARN, based on [CaffeOnSp
 Figure1. CaffeOnYARN Architecture
 </p>
 
+Figure 1 describes the system architecture of CaffeOnYARN. Based on CaffeOnSpark, we launch Caffe engines on CPU devices within the YARN container. As same as CaffeOnSpark, CaffeOnYarn containers communicate to each other via MPI allreduce style interface via TCP/Ethernet or RDMA/Infiniband.
+
+
 ## Quick Start Guide
 ### Set up
 1. Git clone ..
@@ -17,7 +20,7 @@ Figure1. CaffeOnYARN Architecture
 
    ```sh
    export CAFFE_ON_YARN=$(pwd)/CaffeOnYARN
-   export LD_LIBRARY_PATH=${CAFFE_ON_YARN}/jni_so
+   export LD_LIBRARY_PATH=${CAFFE_ON_YARN}/caffe/lib
    ```
 
 3. Compile CaffeOnYARN

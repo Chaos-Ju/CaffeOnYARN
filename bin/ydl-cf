@@ -51,7 +51,7 @@ do
 shift
 done
 
-CLIENT_MAIN_CLASS="org.apache.hadoop.yarn.applications.caffe.Client"
+CLIENT_MAIN_CLASS="org.hdl.caffe.yarn.app.Client"
 
 yarn jar $jar $CLIENT_MAIN_CLASS \
          --jar $jar \
