@@ -1,6 +1,8 @@
 # Caffe On YARN
 
-Caffe on YARN is a project to support running Caffe on YARN, based on [CaffeOnSpark](https://github.com/yahoo/CaffeOnSpark) from yahoo to rebase on YARN by removing Spark dependency. It's a part of Deep Learning on Hadoop ([HDL](https://github.com/Intel-bigdata/HDL)). Note that current project is a prototype with limitation and is still under development.
+Caffe on YARN is a project to support running Caffe on YARN, based on [CaffeOnSpark](https://github.com/yahoo/CaffeOnSpark) from yahoo to rebase on YARN by removing Spark dependency. It's a part of Deep Learning on Hadoop ([HDL](https://github.com/Intel-bigdata/HDL)). 
+
+Note that current project is a prototype with limitation and is still under development.
 
 ## Architecture
 <p align="center">
