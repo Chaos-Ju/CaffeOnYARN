@@ -24,8 +24,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>caffe-yarn-app</module>
         <module>caffe-distri</module>
         <module>caffe-grid</module>
+        <module>caffe-yarn-app</module>
     </modules>
 </project>
